@@ -24,6 +24,7 @@ class PermissionsSeeder extends Seeder
         Permission::create(['name' => 'delete articles']);
         Permission::create(['name' => 'publish articles']);
         Permission::create(['name' => 'unpublish articles']);
+        Permission::create(['name' => 'change roles']);
 
         // create roles and assign existing permissions
         $role1 = Role::create(['name' => 'writer']);
@@ -36,6 +37,8 @@ class PermissionsSeeder extends Seeder
 
         $role3 = Role::create(['name' => 'Super-Admin']);
         // gets all permissions via Gate::before rule; see AuthServiceProvider
+        $allPermissions = Permission::pluck('name')->toArray();
+        $role3->syncPermissions($allPermissions);
 
         // create demo users
         $user = \App\Models\User::factory()->create([

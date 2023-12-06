@@ -37,4 +37,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:Super-Admin'])->group(function () {
     Route::get('/manage-roles', [App\Http\Controllers\RoleController::class, 'index'])->name('manage.roles');
     Route::post('/manage-roles/{user}', [App\Http\Controllers\RoleController::class, 'update'])->name('manage.roles.update');
+
+    Route::get('/manage-permissions', [App\Http\Controllers\PermissionController::class,'index'])->name('manage.permissions');
+    Route::post('/manage-permissions/{user}', [App\Http\Controllers\PermissionController::class, 'update'])->name('manage.permissions.update');
 });

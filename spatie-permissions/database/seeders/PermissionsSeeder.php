@@ -25,6 +25,7 @@ class PermissionsSeeder extends Seeder
         Permission::create(['name' => 'publish articles']);
         Permission::create(['name' => 'unpublish articles']);
         Permission::create(['name' => 'change roles']);
+        Permission::create(['name' => 'change permissions']);
 
         // create roles and assign existing permissions
         $role1 = Role::create(['name' => 'writer']);

@@ -9,40 +9,48 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+
+
     public function index(Request $request)
     {
-        $search = $request->input('search');
-        $priceRange = $request->input('price_range');
-        $category = $request->input('category');
+        $products = $this->getFilteredProducts($request);
+        $categories = Category::all();
 
+        return view('products.index', compact('products', 'categories'));
+    }
+
+    public function filterAndSearchProducts(Request $request)
+    {
+        $products = $this->getFilteredProducts($request);
+
+        return view('products.filtered', compact('products'));
+    }
+
+    private function getFilteredProducts($request)
+    {
         $products = Product::query();
 
-        if (!empty($search)) {
-            // $products = Product::where('name', 'like', "%$search%")
-            //     ->orWhere('code', 'like', "%$search%");
-
-            $products->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%$search%")
-                    ->orWhere('code', 'like', "%$search%");
+        if (!empty($request->search)) {
+            $products->where(function ($query) use ($request) {
+                $query->where('name', 'like', "%$request->search%")
+                    ->orWhere('code', 'like', "%$request->search%");
             });
         }
 
-        if (!empty($priceRange)) {
-            $priceLimits = explode('-', $priceRange);
+        if (!empty($request->price_range)) {
+            $priceLimits = explode('-', $request->price_range);
             $minPrice = $priceLimits[0];
             $maxPrice = !empty($priceLimits[1]) ? $priceLimits[1] : PHP_FLOAT_MAX;
             $products->whereBetween('unit_price', [$minPrice, $maxPrice]);
         }
 
-        if (!empty($category)) {
-            $products->where('category_id', $category);
+        if (!empty($request->category)) {
+            $products->where('category_id', $request->category);
         }
 
-        $products = $products->get();
-
-        $categories = Category::all();
-        return view('products.index', compact('products', 'categories'));
+        return $products->get();
     }
+
 
     public function show(Product $product)
     {
@@ -57,30 +65,29 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('create_products');
+        $this->authorize('add_products');
 
-        // $request->validate([
-        //     'product_name' => 'required|string',
-        //     'product_code' => 'required|string',
-        //     'product_description' => 'nullable|string',
-        //     'product_status' => 'required|in:On Hold,Canceled,Success',
-        //     'unit_price' => 'required|numeric',
-        //     'discount' => 'required|numeric',
-        //     'final_price' => 'required|numeric',
-        //     'category_id' => 'required|exists:categories,id',
-        //     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        // ]);
+        
 
-
-
+        $request->validate([
+            'product_name' => 'required|string',
+            'product_code' => 'required|string',
+            'product_description' => 'nullable|string',
+            'unit_price' => 'required|numeric',
+            'discount' => 'required|numeric',
+            'final_price' => 'required|numeric',
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+        
         $imagePath = null;
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
+        if ($request->hasFile('product_image')) {
+            $image = $request->file('product_image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('uploads'), $imageName);
             $imagePath = 'uploads/' . $imageName;
         }
-
+   
         $product = Product::create([
             'name' => $request->input('product_name'),
             'code' => $request->input('product_code'),
@@ -139,7 +146,7 @@ class ProductController extends Controller
 
 
     public function destroy(Product $product)
-    {   
+    {
         $this->authorize('delete_products', $product);
 
         $product->delete();

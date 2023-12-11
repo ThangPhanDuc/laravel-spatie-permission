@@ -21,9 +21,9 @@
 
     <!-- Main content -->
     <section class="content">
-        <form action="{{ route('products.index') }}" method="GET" id="searchAndFilterForm">
-            <div class="row">
-                <div class="col-md-10 offset-md-1">
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <form id="searchAndFilterForm">
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
@@ -40,9 +40,9 @@
                                 <label for="price_range">Price Range:</label>
                                 <select name="price_range" id="price_range" class="select2" style="width: 100%;">
                                     <option value="" selected>All Prices</option>
-                                    <option value="0-200" {{ request('price_range') == '0-200' ? 'selected' : '' }}> $0 - $200</option>
-                                    <option value="200-500" {{ request('price_range') == '200-500' ? 'selected' : '' }}> $200 - $500</option>
-                                    <option value="500" {{ request('price_range') == '500-' ? 'selected' : '' }}> $500 and above</option>
+                                    <option value="0-200"> $0 - $200</option>
+                                    <option value="200-500"> $200 - $500</option>
+                                    <option value="500"> $500 and above</option>
                                 </select>
                             </div>
                         </div>
@@ -50,9 +50,9 @@
                             <div class="form-group">
                                 <label for="category">Category:</label>
                                 <select name="category" id="category" class="select2" style="width: 100%;">
-                                    <option value="" {{ request('category') == '' ? 'selected' : '' }} selected>All Categories</option>
+                                    <option value="" selected>All Categories</option>
                                     @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                    <option value="{{ $category->id }}">
                                         {{ $category->name }}
                                     </option>
                                     @endforeach
@@ -64,21 +64,19 @@
                         <div class="input-group input-group-lg">
                             <input type="search" name="search" class="form-control form-control-lg" placeholder="Type your keywords here" value="{{ request('search') }}">
                             <div class="input-group-append">
-                                <button type="submit" class="btn btn-lg btn-default">
+                                <button type="button" class="btn btn-lg btn-default" onclick="updateProducts()">
                                     <i class="fa fa-search"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
-        </form>
+        </div>
         <!-- Default box -->
         <div class="card">
-
             <div class="card-header">
                 <h3 class="card-title">Products</h3>
-
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                         <i class="fas fa-minus"></i>
@@ -88,9 +86,6 @@
                     </button>
                 </div>
             </div>
-
-
-
             <div class="card-body p-0">
                 <table class="table table-striped projects">
                     <thead>
@@ -124,7 +119,7 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tbody">
                         @foreach ($products as $product)
                         <tr>
                             <td>
@@ -155,18 +150,18 @@
                                 {{ $product->category->name }}
                             </td>
                             <td>
-
                                 <img src="{{ $product->image }}" alt="{{ $product->name }}" style="max-width: 60px; max-height: 600px;">
                             </td>
-
                             <td class="project-actions text-center">
                                 <div class="btn-group">
                                     <a class="btn btn-primary btn-sm mx-1" href="{{ route('products.show', $product) }}">
                                         <i class="fas fa-folder"></i> View
                                     </a>
+                                    @can('edit_products')
                                     <a class="btn btn-info btn-sm mx-1" href="{{ route('products.edit', $product) }}">
                                         <i class="fas fa-pencil-alt"></i> Edit
                                     </a>
+                                    @endcan
                                     @can('delete_products')
                                     <form method="post" action="{{ route('products.destroy', $product->id) }}">
                                         @csrf
@@ -178,7 +173,6 @@
                                     @endcan
                                 </div>
                             </td>
-
                         </tr>
                         @endforeach
                     </tbody>
@@ -187,23 +181,31 @@
             <!-- /.card-body -->
         </div>
         <!-- /.card -->
-
     </section>
     <!-- /.content -->
-
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('#price_range').change(function() {
-            $('#searchAndFilterForm').submit();
+    $(function() {
+        $('#price_range, #category, input[name="search"]').change(function() {
+            console.log("filter");
+            updateProducts();
         });
     });
 
-    $(document).ready(function() {
-        $('#category').change(function() {
-            $('#searchAndFilterForm').submit();
+    function updateProducts() {
+        $.ajax({
+            url: '{{ route('products.filter-and-search')}}',
+            type: 'GET',
+            data: $('#searchAndFilterForm').serialize(),
+            success: function(data) {
+                $('#tbody').html(data);
+                console.log("data: ", data);
+            },
+            error: function(error) {
+                console.log(error);
+            }
         });
-    });
+    }
 </script>
 @endsection

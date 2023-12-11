@@ -23,7 +23,7 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-// Route::redirect('/home', '/admin');
+Route::redirect('/home', '/admin');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin', function () {
@@ -31,7 +31,10 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->where('product', '[0-9]+')->name('products.show');
+    
+    Route::get('/filter-and-search-products',  [ProductController::class, 'filterAndSearchProducts'])->name('products.filter-and-search');
+
 
     Route::middleware(['role:admin|employee'])->group(function () {
 
@@ -49,3 +52,5 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/manage-roles/{user}', [RoleController::class, 'updateRoles'])->name('roles.update');
     });
 });
+
+

@@ -23,9 +23,6 @@ class PermissionRoleTableSeeder extends Seeder
             'add_products',
             'edit_products',
             'delete_products',
-            'add_categories',
-            'edit_categories',
-            'delete_categories',
             'change_roles',
         ];
 

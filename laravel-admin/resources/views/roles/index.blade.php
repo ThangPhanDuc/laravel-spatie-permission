@@ -63,7 +63,7 @@
                     </thead>
                     <tbody>
                         @foreach ($users as $user)
-                        <tr>
+                        <tr id="row_{{ $user->id }}">
                             <td>
                                 {{ $user->id }}
                             </td>
@@ -83,21 +83,17 @@
                                 {{ $user->roles->pluck('name')->implode(', ') }}
                             </td>
                             <td class="align-middle text-center">
-    <form method="post" action="{{ route('roles.update', $user) }}">
-        @csrf
-        <div class="form-check form-check-inline">
-            @foreach($roles as $role)
-            <input type="checkbox" class="form-check-input" name="roles[]" value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'checked' : '' }}>
-            <label class="form-check-label mr-2">{{ $role->name }}</label>
-            @endforeach
-        </div>
-        <button type="submit" class="btn btn-primary btn-sm mt-2">Update Roles</button>
-    </form>
-</td>
-
-
-
-
+                                <form method="post" action="{{ route('roles.update', $user) }}">
+                                    @csrf
+                                    <div class="form-check form-check-inline">
+                                        @foreach($roles as $role)
+                                        <input type="checkbox" class="form-check-input" name="roles[]" value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'checked' : '' }}>
+                                        <label class="form-check-label mr-2">{{ $role->name }}</label>
+                                        @endforeach
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm mt-2">Update Roles</button>
+                                </form>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -111,5 +107,30 @@
     <!-- /.content -->
 
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(function() {
+        $('#price_range, #category, input[name="search"]').change(function() {
+            console.log("filter");
+            updateProducts();
+        });
+    });
+
+    function updateProducts() {
+        $.ajax({
+            url: '{{ route('
+            products.filter - and - search ')}}',
+            type: 'GET',
+            data: $('#searchAndFilterForm').serialize(),
+            success: function(data) {
+                $('#tbody').html(data);
+                console.log("data: ", data);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
 
 @endsection

@@ -51,6 +51,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/manage-roles', [RoleController::class, 'index'])->name('roles.index');
         Route::post('/manage-roles/{user}', [RoleController::class, 'updateRoles'])->name('roles.update');
     });
+
+    //on branch feature/manage-role-ajax 
 });
 
 

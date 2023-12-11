@@ -17,6 +17,15 @@ class RoleController extends Controller
         return view('roles.index', compact('users', 'roles'));
     }
 
+    // public function updateRoles(Request $request, User $user)
+    // {
+    //     $this->authorize('change_roles', $user);
+
+    //     $user->syncRoles($request->roles);
+
+    //     return redirect()->route('roles.index')->with('success', 'User roles updated successfully.');
+    // }
+
     public function updateRoles(Request $request, User $user)
     {
         $this->authorize('change_roles', $user);
